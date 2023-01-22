@@ -1,6 +1,8 @@
 const notesRouter = require('express').Router();
 const { readFromFile, readAndAppend } = require('../helpers/fsUtils');
 const uuid = require('../helpers/uuid');
+const fs = require('fs');
+
 
 // GET Route for retrieving all the tips
 notesRouter.get('/', (req, res) => {
@@ -22,11 +24,39 @@ notesRouter.post('/', (req, res) => {
       noteID: uuid(),
     };
 
-    readAndAppend(newNote, './db/db.json');
-    res.json(`Note added successfully 🚀`);
-  } else {
-    res.error('Error in adding note');
-  }
-});
+    fs.readFile('./db/db.json', 'utf8', (err, data) => {
+    if (err) {
+    console.error(err);
+    } else {
+    // Convert string into JSON object
+    const parsedNotes = JSON.parse(data);
+
+    // Add a new review
+    parsedNotes.push(newNote);
+
+    // Write updated reviews back to the file
+    fs.writeFile(
+        './db/db.json',
+        JSON.stringify(parsedNotes, null, 4),
+        (writeErr) =>
+        writeErr
+            ? console.error(writeErr)
+            : console.info('Successfully updated notes!')
+        );
+     }
+    });
+    const response = {
+        status: 'success',
+        body: newNote,
+      };
+  
+      console.log(response);
+      res.status(201).json(response);
+    } else {
+      res.status(500).json('Error in creating note');
+    }
+  });
+  
+
 
 module.exports = notesRouter;
