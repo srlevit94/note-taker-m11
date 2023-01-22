@@ -2,10 +2,12 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
-const { clog } = require('./middleware/clog');
+const uuid = require('./helpers/uuid');
+
+// const { clog } = require('./middleware/clog');
 
 const app = express();
-const PORT = process.env.port || 3001;
+const PORT = process.env.PORT || 3001;
 
 // destination file for notes
 const { notes } = require('./db/db.json');
@@ -14,16 +16,23 @@ const { notes } = require('./db/db.json');
 app.use(express.static('public'));
 app.use(express.urlencoded({extended: true}));
 app.use(express.json())
-app.use(clog);
+// app.use(clog);
 
+app.get('/', (req, res) => 
+  res.sendFile(path.join(__dirname,'./public/index.html'))
+);
+
+// -- [GET *] should return the index.html file.
+app.get('*', (req, res) => 
+  res.sendFile(path.join(__dirname,'./public/index.html'))
+);
 
 // -- [GET /notes] should return the notes.html file.
 app.get('/notes', (req, res) => 
-    res.sendFile(path.join(__dirname, 'notes.html')));
-
-// -- [GET *] should return the index.html file.
-app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'index.html'))
+    res.sendFile(path.join(__dirname, './public/notes.html'))
 );
+
+
 
 // -- [GET /api/notes] should read the db.json file and return all saved notes as JSON.
 app.get('/api/notes', (req, res) => res.json(notes));
@@ -56,3 +65,7 @@ app.post('/api/notes', (req, res) => {
       res.status(500).json('Error in creating Note');
     }
   });
+
+  app.listen(PORT, () =>
+    console.log(`App listening at http://localhost:${PORT}`)
+    );
