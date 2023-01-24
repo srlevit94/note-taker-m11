@@ -17,9 +17,9 @@ This application allows the user to write and save notes. It uses Express.js to 
 - GitHub Repository: https://github.com/srlevit94/note-taker-srl
 
 ## Screenshot of Deployed Application:
-![web image 1](https://i.imgur.com/IwpJNn5.jpg)
+![web image 1](https://i.imgur.com/J5BITVc.jpg)
 ![web image 2](https://i.imgur.com/GpfwLC4.jpg)
-![web image 3](https://i.imgur.com/Lt3fl5v.jpg)
+![web image 3](https://i.imgur.com/IwpJNn5.jpg)
 
  ## Questions
   If you have any questions about the project you can reach out to me via email or GitHub with the information below. 
