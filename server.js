@@ -2,8 +2,11 @@
 const express = require('express');
 const path = require('path');
 const { clog } = require('./middleware/clog');
-const api = require('./routes/index.js');
-const notesRoute = require('./routes/notes.js')
+// const api = require('./routes/index.js');
+// const notesRoute = require('./routes/notes.js')
+const uuid = require('./helpers/uuid');
+const fsUtils = require('./helpers/fsUtils');
+
 
 // const notesRoute = require('./routes/notes.html')
 
@@ -11,23 +14,18 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // destination file for notes
-const { notes } = require('./db/db.json');
+const notes = require('./db/db.json');
 
 //express middleware
 app.use(express.static('public'));
 app.use(express.urlencoded({extended: true}));
 app.use(express.json())
 app.use(clog);
-app.use('/api', api);
-app.use('/', notesRoute);
+// app.use('/api', api);
+// app.use('/', notesRoute);
 
 // GET Route for homepage
 app.get('/', (req, res) => 
-  res.sendFile(path.join(__dirname,'./public/index.html'))
-);
-
-// -- [GET *] should return the index.html file.
-app.get('*', (req, res) => 
   res.sendFile(path.join(__dirname,'./public/index.html'))
 );
 
@@ -40,10 +38,33 @@ app.listen(PORT, () =>
 console.log(`App listening at http://localhost:${PORT}`)
 );
 
-
-
 // -- [GET /api/notes] should read the db.json file and return all saved notes as JSON.
 app.get('/api/notes', (req, res) => res.json(notes));
+
+// -- [GET *] should return the index.html file.
+app.get('*', (req, res) => 
+  res.sendFile(path.join(__dirname,'./public/index.html'))
+);
+
+app.post('/api/notes', (req, res) => {
+  console.info(`${req.method} request received to add a note`);
+  console.log(req.body);
+
+  const { title, text } = req.body;
+
+  if (req.body) {
+    const newNote = {
+      title,
+      text,
+      id: uuid(),
+    };
+
+    fsUtils.readAndAppend(newNote, './db/db.json');
+    res.json('note added successfully');
+  } else {
+    res.error('Error in adding note');
+  }
+});
 
 // // -- [POST /api/notes] should receive a new note to save on the request body, add it to the [db.json] file, and then return the new note to the client. You'll need to find a way to give each note a unique id when it's saved (look into [npm] packages that could do this for you).
 // app.post('/api/notes', (req, res) => {
