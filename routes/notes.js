@@ -1,62 +1,56 @@
-const notesRouter = require('express').Router();
+const notes = require('express').Router();
 const { readFromFile, readAndAppend } = require('../helpers/fsUtils');
 const uuid = require('../helpers/uuid');
 const fs = require('fs');
 
-
-// GET Route for retrieving all the tips
-notesRouter.get('/', (req, res) => {
+// GET Route for retrieving all the notes
+notes.get('/api/notes', (req, res) => {
   console.info(`${req.method} request received for notes`);
   readFromFile('./db/db.json').then((data) => res.json(JSON.parse(data)));
 });
 
-// POST Route for a new UX/UI tip
-notesRouter.post('/', (req, res) => {
+// POST Route for a new note
+notes.post('/api/notes', (req, res) => {
   console.info(`${req.method} request received to add a note`);
   console.log(req.body);
 
-  const { title, content } = req.body;
+  const { title, text } = req.body;
 
   if (req.body) {
     const newNote = {
       title,
-      content,
-      noteID: uuid(),
+      text,
+      id: uuid(),
     };
 
-    fs.readFile('./db/db.json', 'utf8', (err, data) => {
-    if (err) {
-    console.error(err);
-    } else {
-    // Convert string into JSON object
-    const parsedNotes = JSON.parse(data);
+    readAndAppend(newNote, './db/db.json');
+    res.json('note added successfully');
+  } else {
+    res.error('Error in adding note');
+  }
+});
 
-    // Add a new review
-    parsedNotes.push(newNote);
+module.exports = notes;
 
-    // Write updated reviews back to the file
-    fs.writeFile(
-        './db/db.json',
-        JSON.stringify(parsedNotes, null, 4),
-        (writeErr) =>
-        writeErr
-            ? console.error(writeErr)
-            : console.info('Successfully updated notes!')
-        );
-     }
-    });
-    const response = {
-        status: 'success',
-        body: newNote,
-      };
-  
-      console.log(response);
-      res.status(201).json(response);
-    } else {
-      res.status(500).json('Error in creating note');
-    }
-  });
-  
+// fs.readFile('./db/db.json', 'utf8', (err, data) => {
+//   if (err) {
+//     console.error(err);
+//   } else {
+//     // Convert string into JSON object
+//     const parsedNotes = JSON.parse(data);
 
+//     // Add a new review
+//     parsedNotes.push(newNote);
 
-module.exports = notesRouter;
+//     // Write updated notes back to the file
+//     fs.writeFile(
+//       './db/db.json',
+//       JSON.stringify(parsedNotes, null, 4),
+//       (writeErr) => {
+//         writeErr
+//           ? console.error(writeErr)
+//           : res.json(notes)
+//       }
+//     );
+//   }
+// });
